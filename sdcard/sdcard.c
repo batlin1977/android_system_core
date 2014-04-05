@@ -1214,9 +1214,10 @@ static int handle_read(struct fuse* fuse, struct fuse_handler* handler,
         const struct fuse_in_header* hdr, const struct fuse_read_in* req)
 {
     struct handle *h = id_to_ptr(req->fh);
-    __u64 unique = hdr->unique;
+    volatile __u64 vars64[2];
+    vars64[0] = hdr->unique;
     __u32 size = req->size;
-    __u64 offset = req->offset;
+    vars64[1] = req->offset;
     int res;
 
     /* Don't access any other fields of hdr or req beyond this point, the read buffer
@@ -1224,15 +1225,15 @@ static int handle_read(struct fuse* fuse, struct fuse_handler* handler,
      * saves us 128KB per request handler thread at the cost of this scary comment. */
 
     TRACE("[%d] READ %p(%d) %u@%llu\n", handler->token,
-            h, h->fd, size, offset);
+            h, h->fd, size, vars64[1]);
     if (size > sizeof(handler->read_buffer)) {
         return -EINVAL;
     }
-    res = pread64(h->fd, handler->read_buffer, size, offset);
+    res = pread64(h->fd, handler->read_buffer, size, vars64[1]);
     if (res < 0) {
         return -errno;
     }
-    fuse_reply(fuse, unique, handler->read_buffer, res);
+    fuse_reply(fuse, vars64[0], handler->read_buffer, res);
     return NO_STATUS;
 }
 
