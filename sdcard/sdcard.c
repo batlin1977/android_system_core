@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "sdcard"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +36,7 @@
 
 #include <cutils/fs.h>
 #include <cutils/hashmap.h>
+#include <cutils/log.h>
 #include <cutils/multiuser.h>
 
 #include <private/android_filesystem_config.h>
@@ -91,12 +94,12 @@
 #define FUSE_TRACE 0
 
 #if FUSE_TRACE
-#define TRACE(x...) fprintf(stderr,x)
+#define TRACE(x...) ALOGD(x)
 #else
 #define TRACE(x...) do {} while (0)
 #endif
 
-#define ERROR(x...) fprintf(stderr,x)
+#define ERROR(x...) ALOGE(x)
 
 #define FUSE_UNKNOWN_INO 0xffffffff
 
